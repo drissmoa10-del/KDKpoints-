@@ -1,0 +1,929 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>👑 KDK Point Kingdom</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --g: #ffd700;
+            --bg: #060919;
+            --neon-blue: #00e1ff;
+            --neon-purple: #9d4edf;
+            --gn: #00ff88;
+            --card-bg: rgba(18, 24, 54, 0.85);
+            --card-border: rgba(0, 225, 255, 0.3);
+            --logo-url: url('https://i.ibb.co/gLVJLjYh/image.jpg');
+        }
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at top, #121838 0%, var(--bg) 100%);
+            color: #fff; text-align: center; font-family: 'Segoe UI', Roboto, sans-serif;
+            padding: 10px; min-height: 100vh; display: flex; flex-direction: column;
+            justify-content: space-between; overflow-x: hidden; padding-bottom: 110px;
+        }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px 16px; backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(0, 225, 255, 0.2); }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 50px; height: 50px; border-radius: 50%; background-image: var(--logo-url); background-size: cover; background-position: center; border: 2px solid var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
+        .user-details { text-align: right; }
+        .user-name { font-weight: 800; font-size: 15px; color: #fff; }
+        .user-level { font-size: 12px; color: var(--g); background: rgba(255, 215, 0, 0.15); padding: 3px 8px; border-radius: 6px; display: inline-block; font-weight: 600; margin-top: 3px; }
+        .top-currencies { display: flex; gap: 6px; }
+        .cur-item { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 12px; border-radius: 10px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .tab-section { display: none; width: 100%; }
+        .tab-section.active { display: block; }
+        
+        .recharge-card { background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(22, 24, 54, 0.9) 100%); border: 1px solid rgba(255, 87, 34, 0.5); border-radius: 14px; padding: 12px; margin: 8px 0; box-shadow: 0 0 15px rgba(255, 87, 34, 0.2); }
+        .recharge-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; }
+        .recharge-bar { height: 12px; background: rgba(0,0,0,0.6); border-radius: 10px; overflow: hidden; }
+        .recharge-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ff5722, var(--gn)); transition: width 0.3s; }
+        
+        .daily-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0; }
+        .daily-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 10px 4px; cursor: pointer; transition: all 0.2s; }
+        .daily-card:active { transform: scale(0.94); }
+        .daily-card i { font-size: 20px; margin-bottom: 4px; color: var(--neon-blue); }
+        .daily-card .title { font-size: 11px; font-weight: bold; color: #e2e8f0; }
+        .daily-card .timer { font-size: 10px; color: var(--gn); margin-top: 3px; font-weight: bold; }
+        
+        .middle-icon-wrapper {
+            display: flex; justify-content: flex-end; padding: 0 10px; margin-top: 5px; margin-bottom: -15px;
+        }
+        .wheel-side-icon {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: radial-gradient(circle, #2a0845 0%, #120826 100%);
+            border: 2px solid var(--g);
+            box-shadow: 0 0 15px var(--g), 0 0 25px var(--neon-purple);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; animation: iconSpinGlow 3s infinite linear;
+        }
+        .wheel-side-icon i { font-size: 24px; color: var(--g); }
+        @keyframes iconSpinGlow {
+            0% { transform: rotate(0deg) scale(1); box-shadow: 0 0 12px var(--g); }
+            50% { transform: rotate(180deg) scale(1.08); box-shadow: 0 0 22px var(--neon-purple); }
+            100% { transform: rotate(360deg) scale(1); box-shadow: 0 0 12px var(--g); }
+        }
+
+        .main-score-box { margin: 6px 0; }
+        #p { font-size: 42px; color: #fff; font-weight: 900; text-shadow: 0 0 20px var(--neon-blue); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        #p i { color: var(--g); font-size: 36px; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)); }
+        
+        .tap-stage { position: relative; width: 230px; height: 230px; margin: 10px auto; display: flex; align-items: center; justify-content: center; }
+        .stage-platform { position: absolute; bottom: 0; width: 190px; height: 45px; background: radial-gradient(ellipse at center, rgba(0, 225, 255, 0.4) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; transform: rotateX(60deg); box-shadow: 0 0 30px var(--neon-blue); animation: pulsePlatform 2s infinite alternate; }
+        @keyframes pulsePlatform { 0% { opacity: 0.5; transform: rotateX(60deg) scale(0.9); } 100% { opacity: 1; transform: rotateX(60deg) scale(1.1); } }
+        
+        #tap { 
+            position: relative; width: 190px; height: 190px; border-radius: 50%; 
+            background: radial-gradient(circle at 30% 30%, #1a2247 0%, #080b1a 100%); 
+            border: 4px solid var(--neon-blue); color: #fff; cursor: pointer; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: 0 0 30px var(--neon-blue), inset 0 0 20px var(--neon-blue); 
+            transition: transform 0.05s; z-index: 2; outline: none; 
+        }
+        #tap::before {
+            content: ''; position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px;
+            border-radius: 50%; border: 3px dashed var(--neon-blue);
+            animation: spinRing 12s linear infinite; pointer-events: none;
+        }
+        @keyframes spinRing { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #tap:active { transform: scale(.92); }
+        .character-avatar { width: 170px; height: 170px; border-radius: 50%; background-image: var(--logo-url); background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(0,0,0,0.8); border: 2px solid rgba(255,255,255,0.9); }
+
+        .wheel-modal, .cipher-modal, .level-up-modal, .prize-modal, .ad-timer-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(6, 9, 25, 0.98); backdrop-filter: blur(15px);
+            z-index: 2000; flex-direction: column; justify-content: space-between;
+            padding: 15px; align-items: center;
+        }
+        .wheel-modal.active, .cipher-modal.active, .level-up-modal.active, .prize-modal.active, .ad-timer-modal.active { display: flex; }
+        
+        .close-modal-btn {
+            position: absolute; top: 15px; left: 15px; font-size: 20px; color: #fff;
+            background: rgba(255,255,255,0.2); border: 1px solid var(--card-border);
+            width: 38px; height: 38px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; z-index: 2100;
+        }
+
+        .top-ad-zone-25 {
+            height: 25%; width: 100%; max-width: 380px; margin-top: 30px;
+            background: rgba(0,0,0,0.8); border: 1.5px solid var(--neon-blue);
+            border-radius: 14px; padding: 4px; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden; position: relative;
+        }
+        .top-ad-zone-25 iframe { width: 100%; height: 100%; border: none; border-radius: 10px; }
+
+        .bottom-wheel-zone-75 {
+            height: 72%; width: 100%; max-width: 380px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .vegas-wheel-container {
+            position: relative; width: 260px; height: 260px; margin: 10px auto;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .wheel-pointer {
+            position: absolute; top: -12px; z-index: 10;
+            width: 0; height: 0;
+            border-left: 14px solid transparent; border-right: 14px solid transparent;
+            border-top: 24px solid var(--g); filter: drop-shadow(0 0 10px var(--g));
+        }
+        .vegas-canvas-wrapper {
+            width: 250px; height: 250px; border-radius: 50%;
+            border: 5px solid var(--g);
+            box-shadow: 0 0 25px var(--neon-purple), inset 0 0 15px rgba(0,0,0,0.8);
+            position: relative; overflow: hidden;
+        }
+        #wheelCanvas { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.15, 0.9, 0.15, 1); }
+
+        .cipher-inputs { display: flex; gap: 8px; justify-content: center; margin: 20px 0; direction: ltr; }
+        .cipher-box {
+            width: 45px; height: 55px; font-size: 24px; font-weight: bold;
+            text-align: center; background: rgba(0, 225, 255, 0.1);
+            border: 2px solid var(--neon-blue); border-radius: 12px; color: #fff; outline: none;
+        }
+        .cipher-box:focus { border-color: var(--g); box-shadow: 0 0 10px var(--g); }
+
+        .energy-container { width: 92%; margin: 6px auto 10px; }
+        .e-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #cbd5e1; }
+        .e { background: rgba(0,0,0,0.6); border-radius: 10px; height: 12px; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15); }
+        .eb { width: 100% !important; height: 100%; background: linear-gradient(90deg, var(--neon-blue), var(--gn)); transition: width .2s ease; }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 380px; margin: 8px auto; }
+        .b { 
+            background: var(--card-bg); border: 1px solid var(--card-border); 
+            border-radius: 14px; padding: 15px 10px; color: #fff; font-size: 14px; 
+            font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); transition: all 0.2s; 
+        }
+        .b:active { transform: scale(0.95); }
+        
+        .ad-box-direct { margin: 10px auto; text-align: center; max-width: 380px; width: 100%; }
+        .ad-link-btn { 
+            background: linear-gradient(135deg, #121838 0%, #1a2247 100%); 
+            border: 1.5px solid var(--neon-blue); color: #fff; padding: 15px; 
+            border-radius: 14px; text-decoration: none; font-weight: 800; display: block; 
+            font-size: 14px; box-shadow: 0 0 15px rgba(0, 225, 255, 0.25); cursor: pointer; 
+        }
+        
+        .help-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 14px; padding: 14px; margin-bottom: 12px; text-align: right;
+        }
+        .help-card h4 { color: var(--neon-blue); font-size: 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .help-card p { font-size: 11.5px; color: #cbd5e1; line-height: 1.6; }
+
+        .chests-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+        .chest-card { background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, var(--card-bg) 100%); border: 1px solid var(--g); border-radius: 14px; padding: 12px; text-align: center; }
+        .chest-card i { font-size: 28px; color: var(--g); margin-bottom: 6px; }
+        
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: rgba(10, 14, 33, 0.98); backdrop-filter: blur(15px); 
+            border-top: 1.5px solid var(--card-border); 
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 12px 4px 18px; z-index: 1000; height: 70px;
+        }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #94a3b8; font-size: 11px; font-weight: 800; cursor: pointer; width: 20%; 
+        }
+        .nav-item.active { color: var(--neon-blue); }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        
+        .ft { position: absolute; font-size: 26px; font-weight: 900; color: var(--neon-blue); pointer-events: none; animation: f .7s ease-out forwards; text-shadow: 0 0 10px rgba(0,0,0,0.8); z-index: 10; }
+        @keyframes f { 0% { opacity: 1; transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.2); } 100% { opacity: 0; transform: translateY(-60px) scale(1); } }
+        footer { font-size: 11px; color: #64748b; text-align: center; margin: 15px 0 5px; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="user-info">
+            <div class="user-avatar" id="avatar-icon"></div>
+            <div class="user-details">
+                <div class="user-name" id="name">KDK User</div>
+                <div class="user-level" id="user-lvl">المستوى 1 • مبتدئ 👑</div>
+            </div>
+        </div>
+        <div class="top-currencies">
+            <div class="cur-item"><i class="fa-solid fa-key" style="color:var(--g)"></i> <span id="keys-count">0</span></div>
+            <div class="cur-item"><i class="fa-solid fa-gem" style="color:var(--neon-blue)"></i> <span id="gems-count">0</span></div>
+        </div>
+    </div>
+
+    <!-- 1. الرئيسية -->
+    <div id="tab-exchange" class="tab-section active">
+        <div class="recharge-card">
+            <div class="recharge-info">
+                <span>📲 تقدم التعبئة:</span>
+                <span id="recharge-val" style="color:var(--gn)">0 / 10,000</span>
+            </div>
+            <div class="recharge-bar"><div class="recharge-fill" id="recharge-fill"></div></div>
+        </div>
+
+        <div class="daily-grid">
+            <div class="daily-card" onclick="openCipherModal()">
+                <i class="fa-solid fa-key"></i>
+                <div class="title">الشفرة اليومية</div>
+                <div class="timer">5,000 🪙</div>
+            </div>
+            <div class="daily-card" onclick="checkComboRequirement()">
+                <i class="fa-solid fa-star"></i>
+                <div class="title">كومبو اليوم</div>
+                <div class="timer">15,000 🪙</div>
+            </div>
+            <div class="daily-card" onclick="daily()">
+                <i class="fa-solid fa-calendar-check"></i>
+                <div class="title">مكافأة يومية</div>
+                <div class="timer">+50 تعبئة 🎁</div>
+            </div>
+        </div>
+
+        <div class="middle-icon-wrapper">
+            <div class="wheel-side-icon" onclick="openWheelModal()">
+                <i class="fa-solid fa-dharmachakra"></i>
+            </div>
+        </div>
+
+        <div class="main-score-box">
+            <div id="p"><i class="fa-solid fa-coins"></i> <span id="points-val">0</span></div>
+        </div>
+
+        <div class="tap-stage" id="area">
+            <div class="stage-platform"></div>
+            <button id="tap">
+                <div class="character-avatar" id="char-avatar"></div>
+            </button>
+        </div>
+
+        <div class="energy-container">
+            <div class="e-info">
+                <span><i class="fa-solid fa-bolt" style="color:var(--neon-blue)"></i> الطاقة</span>
+                <span id="et">1000/1000</span>
+            </div>
+            <div class="e"><div class="eb" id="eb"></div></div>
+        </div>
+
+        <div class="btn-grid">
+            <div class="b" onclick="boostEnergy()">
+                <i class="fa-solid fa-bolt-lightning" style="color:var(--neon-blue)"></i> شحن الطاقة ⚡
+            </div>
+            <div class="b" onclick="shareWithFriends()">
+                <i class="fa-solid fa-share-nodes" style="color:var(--g)"></i> دعوة أصدقاء 👥
+            </div>
+        </div>
+
+        <div class="ad-box-direct">
+            <div class="ad-link-btn" id="direct-ad-btn" onclick="openProtectedAdLink('https://www.effectivecpmnetwork.com/c14nhbifa?key=36ca7b8acf50e1c9bb4d72d7d8012858')">
+                <i class="fa-solid fa-bullhorn" style="color:var(--neon-blue)"></i> زيارة الراعي الرسمي
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔐 نافذة إدخال الشفرة -->
+    <div class="cipher-modal" id="cipherModal">
+        <div class="close-modal-btn" onclick="closeCipherModal()"><i class="fa-solid fa-xmark"></i></div>
+        <h3 style="color:var(--g); margin-bottom:10px;"><i class="fa-solid fa-key"></i> الشفرة اليومية السرية</h3>
+        <p style="font-size:12px; color:#cbd5e1; margin-bottom:15px;">أدخل كود 5 أرقام المنشور في قناة التلغرام للحصول على +5,000 نقطة!</p>
+        
+        <div class="cipher-inputs">
+            <input type="tel" maxlength="1" class="cipher-box" id="c1" oninput="moveFocus(this, 'c2')">
+            <input type="tel" maxlength="1" class="cipher-box" id="c2" oninput="moveFocus(this, 'c3')">
+            <input type="tel" maxlength="1" class="cipher-box" id="c3" oninput="moveFocus(this, 'c4')">
+            <input type="tel" maxlength="1" class="cipher-box" id="c4" oninput="moveFocus(this, 'c5')">
+            <input type="tel" maxlength="1" class="cipher-box" id="c5" oninput="verifyCipher()">
+        </div>
+
+        <button class="b" style="background:linear-gradient(90deg, var(--gn), var(--neon-blue)); color:#000; width:100%; max-width:260px;" onclick="verifyCipher()">تحقق من الكود 🔓</button>
+    </div>
+
+    <!-- 🎰 نافذة العجلة -->
+    <div class="wheel-modal" id="wheelModal">
+        <div class="close-modal-btn" onclick="closeWheelModal()"><i class="fa-solid fa-xmark"></i></div>
+        
+        <div class="top-ad-zone-25">
+            <div style="font-size:10px; color:var(--gn); font-weight:bold; position:absolute; top:2px; right:8px; z-index:10;">
+                <i class="fa-solid fa-rectangle-ad"></i> إعلان راعي تلقائي
+            </div>
+            <!-- سكربت وإعلان Adsterra Direct Link -->
+            <script src="https://pl30511723.effectivecpmnetwork.com/6c/6f/7a/6c6f7a4e3e3c0468d3b4f518f053a854.js"></script>
+        </div>
+
+        <div class="bottom-wheel-zone-75">
+            <div style="font-size:12px; color:var(--g); font-weight:bold; margin-bottom:4px;" id="wheel-status-text">
+                عندك 2 تدويرات مجانية اليوم!
+            </div>
+            <div class="vegas-wheel-container">
+                <div class="wheel-pointer"></div>
+                <div class="vegas-canvas-wrapper">
+                    <canvas id="wheelCanvas" width="300" height="300"></canvas>
+                </div>
+            </div>
+
+            <button class="b" style="width:100%; background:linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); font-size:15px; font-weight:900; margin-top:5px;" id="spin-btn" onclick="spinLuckyWheel()">🎰 تدوير العجلة</button>
+        </div>
+    </div>
+
+    <!-- 📺 نافذة الإعلان مع زر الإغلاق (X) بعد 15 ثانية وإدراج سكربتات Adsterra -->
+    <div class="ad-timer-modal" id="adTimerModal">
+        <div class="close-modal-btn" id="adCloseBtn" style="display:none;" onclick="closeAdWithReward()"><i class="fa-solid fa-xmark"></i></div>
+        <div style="margin:auto; display:flex; flex-direction:column; align-items:center; width:100%; height:90%;">
+            <div style="font-size:14px; color:var(--g); font-weight:bold; margin-bottom:10px;" id="adTimerText">
+                ⏳ يرجى مشاهدة الإعلان... (15s)
+            </div>
+            <!-- سكربت Adsterra الثاني -->
+            <div style="width:100%; height:85%; display:flex; align-items:center; justify-content:center; background:#000; border-radius:12px; overflow:hidden;">
+                <script src="https://pl30511724.effectivecpmnetwork.com/c5/c1/4d/c5c14d0e61110b45602f17c164075e48.js"></script>
+                <a href="https://www.effectivecpmnetwork.com/c14nhbifa?key=36ca7b8acf50e1c9bb4d72d7d8012858" target="_blank" style="color:#ff5722; font-weight:bold; font-size:16px; text-decoration:underline;">اضغط هنا لمشاهدة العرض 🔥</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎁 نافذة النتيجة -->
+    <div class="prize-modal" id="prizeModal">
+        <h1 style="font-size:50px; margin-bottom:10px;" id="prizeEmoji">🥳</h1>
+        <h3 style="color:var(--g); font-size:20px; margin-bottom:10px;" id="prizeTitle">مبروك!</h3>
+        <p style="font-size:14px; color:#fff; margin-bottom:20px;" id="prizeText">ربحت جائزة!</p>
+        <button class="b" style="width:100%; max-width:200px; background:var(--neon-blue); color:#000; font-weight:bold;" onclick="closePrizeModal()">موافق 👍</button>
+    </div>
+
+    <!-- 🎉 نافذة الليفل الجديد -->
+    <div class="level-up-modal" id="levelUpModal">
+        <h1 style="font-size:45px; margin-bottom:10px;">🎆🎇🎉</h1>
+        <h2 style="color:var(--g); font-size:24px; margin-bottom:10px;" id="levelUpTitle">مستوى جديد مبروك!</h2>
+        <p style="font-size:13px; color:#cbd5e1; margin-bottom:20px;" id="levelUpDesc">لقد وصلت لمستوى متقدم وحصلت على مكافأة تعبئة كبرى!</p>
+        <button class="b" style="width:100%; background:linear-gradient(90deg, var(--gn), var(--neon-blue)); color:#000; font-size:16px;" onclick="claimLevelReward()">📺 مشاهدة إعلان الراعي واستلام المكافأة</button>
+    </div>
+
+    <!-- 2. التعدين -->
+    <div id="tab-mine" class="tab-section">
+        <h3 style="margin:10px 0; color:var(--neon-blue)">⛏️ كروت التعدين والكومبو</h3>
+        <p style="font-size:12px; color:#cbd5e1">شاهد 5 فيديوهات لكل كارت لفتحه وفتح الكومبو اليومي!</p>
+        <div class="cards-list" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+            <div class="chest-card">
+                <i class="fa-solid fa-bolt"></i>
+                <h4>سيرفر KDK</h4>
+                <p style="font-size:11px; color:var(--gn)">+500/ساعة</p>
+                <button class="card-btn" id="card-1-btn" style="margin-top:6px; padding:8px 14px; background:var(--neon-blue); color:#000; font-weight:bold; border:none; border-radius:8px; cursor:pointer;" onclick="watchCardAd(1)">مشاهدة (0/5)</button>
+            </div>
+            <div class="chest-card">
+                <i class="fa-solid fa-microchip"></i>
+                <h4>معالج ملكي</h4>
+                <p style="font-size:11px; color:var(--gn)">+1,200/ساعة</p>
+                <button class="card-btn" id="card-2-btn" style="margin-top:6px; padding:8px 14px; background:var(--neon-blue); color:#000; font-weight:bold; border:none; border-radius:8px; cursor:pointer;" onclick="watchCardAd(2)">مشاهدة (0/5)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. الأنشطة -->
+    <div id="tab-earn" class="tab-section">
+        <h3 style="margin:15px 0 6px; color:var(--g)"><i class="fa-solid fa-box-open"></i> صناديق المفاجآت</h3>
+        <div class="chests-container">
+            <div class="chest-card">
+                <i class="fa-solid fa-vault"></i>
+                <h4 style="font-size:13px">صندوق مميز</h4>
+                <p style="font-size:11px; color:var(--g)">يحتاج 1 مفتاح 🔑</p>
+                <button class="card-btn" style="margin-top:8px; padding:8px 12px;" onclick="openChest(1, 10, 100)">فتح الصندوق</button>
+            </div>
+            <div class="chest-card" style="border-color:var(--neon-purple)">
+                <i class="fa-solid fa-gem" style="color:var(--neon-purple)"></i>
+                <h4 style="font-size:13px">صندوق ملكي</h4>
+                <p style="font-size:11px; color:var(--neon-purple)">يحتاج 3 مفاتيح 🔑</p>
+                <button class="card-btn" style="background:var(--neon-purple); color:#fff; margin-top:8px; padding:8px 12px;" onclick="openChest(3, 100, 500)">فتح الصندوق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Airdrop (مع أزرار المشاركة المباشرة) -->
+    <div id="tab-airdrop" class="tab-section">
+        <h3 style="margin:10px 0; color:var(--neon-purple)">🎁 سحب التعبئة 50DH</h3>
+        <p style="font-size:12px; color:#cbd5e1; margin-bottom:15px">اجمع 10,000 نقطة ثم اضغط زر السحب من البوت فـ تلغرام!</p>
+        
+        <div style="display:flex; flex-direction:column; gap:8px; max-width:320px; margin:auto;">
+            <button class="b" style="background:#25d366; color:#fff;" onclick="shareToSocial('whatsapp')"><i class="fa-brands fa-whatsapp"></i> مشاركة عبر WhatsApp</button>
+            <button class="b" style="background:#0088cc; color:#fff;" onclick="shareToSocial('telegram')"><i class="fa-brands fa-telegram"></i> مشاركة عبر Telegram</button>
+            <button class="b" style="background:#1877f2; color:#fff;" onclick="shareToSocial('facebook')"><i class="fa-brands fa-facebook"></i> مشاركة عبر Facebook</button>
+            <button class="b" style="background:#000; color:#fff; border:1px solid #fff;" onclick="shareToSocial('tiktok')"><i class="fa-brands fa-tiktok"></i> مشاركة عبر TikTok</button>
+        </div>
+    </div>
+
+    <!-- 📖 5. المساعدة ودليل اللعبة وقناة التلغرام 📖 -->
+    <div id="tab-help" class="tab-section">
+        <h3 style="margin:10px 0; color:var(--neon-blue)"><i class="fa-solid fa-circle-question"></i> دليل اللعبة والدعم</h3>
+        
+        <div class="help-card" style="border-color:var(--neon-blue); text-align:center;">
+            <h4 style="justify-content:center; color:var(--neon-blue);"><i class="fa-solid fa-bullhorn"></i> قناة KDK Points الرسمية</h4>
+            <p style="margin-bottom:10px;">تابع قناتنا لمعرفة كروت الكومبو والشفرة يومياً!</p>
+            <button class="b" style="width:100%; background:linear-gradient(90deg, #0088cc, var(--neon-blue)); font-size:14px; margin-bottom:8px;" onclick="openTelegramChannel()">
+                <i class="fa-brands fa-telegram"></i> الانضمام لقناة التلغرام 🚀
+            </button>
+        </div>
+
+        <div class="help-card" style="border-color:var(--g);">
+            <h4 style="color:var(--g);"><i class="fa-solid fa-ranking-star"></i> نظام المستويات والتعدين</h4>
+            <p>• اللعبة فيها <b>1000 مستوى</b> متدرج.<br>• <b>🪙 النقاط العادية:</b> تُكتسب من النقر والتعدين لرفع مستواك والظهور في المتصدرين.<br>• <b>📲 نقاط التعبئة:</b> تُكتسب من الراعي والعجلة ومكافآت الليفلات (للسحب واستبدالها بالتعبئة 50 درهم).<br>• للحصول على جائزة الكومبو (15,000 نقطة عادية)، شاهِد 5 فيديوهات لكل كارت من قسم التعدين ⛏️ أولاً!</p>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" id="nav-exchange" onclick="switchTab('exchange')">
+            <i class="fa-solid fa-gamepad"></i>
+            <span>الرئيسية</span>
+        </div>
+        <div class="nav-item" id="nav-mine" onclick="switchTab('mine')">
+            <i class="fa-solid fa-pickaxe"></i>
+            <span>التعدين ⛏️</span>
+        </div>
+        <div class="nav-item" id="nav-earn" onclick="switchTab('earn')">
+            <i class="fa-solid fa-dharmachakra"></i>
+            <span>الأنشطة 🎰</span>
+        </div>
+        <div class="nav-item" id="nav-airdrop" onclick="switchTab('airdrop')">
+            <i class="fa-solid fa-parachute-box"></i>
+            <span>Airdrop 🎁</span>
+        </div>
+        <div class="nav-item" id="nav-help" onclick="switchTab('help')">
+            <i class="fa-solid fa-circle-question"></i>
+            <span>المساعدة ❓</span>
+        </div>
+    </div>
+
+    <footer><a href="#" style="color:var(--neon-blue)">سياسة الخصوصية</a> | KDK Point © 2026</footer>
+
+    <script>
+        const REPLIT_URL = "https://Point-Seller-Bot.drissmoa10.repl.co";
+        const TOKEN = new URLSearchParams(window.location.search).get('token');
+        let tg = window.Telegram ? window.Telegram.WebApp : null;
+        let userId = null;
+        let initData = tg ? tg.initData : '';
+
+        if (tg) {
+            tg.expand();
+            if (tg.initDataUnsafe?.user) {
+                document.getElementById('name').innerText = tg.initDataUnsafe.user.first_name;
+                userId = tg.initDataUnsafe.user.id;
+            }
+        }
+
+        let todayStr = new Date().toDateString();
+        let tapPoints = parseInt(localStorage.getItem('tapPoints')) || 0;
+        let rechargePoints = parseInt(localStorage.getItem('rechargePoints')) || 0;
+        let userLevel = parseInt(localStorage.getItem('userLevel')) || 1;
+        let maxE = 1000;
+        let curE = parseInt(localStorage.getItem('e')) || maxE;
+        let keys = parseInt(localStorage.getItem('keys')) || 0;
+        let gems = parseInt(localStorage.getItem('gems')) || 0;
+        
+        let card1Views = parseInt(localStorage.getItem('card1Views')) || 0;
+        let card2Views = parseInt(localStorage.getItem('card2Views')) || 0;
+
+        let unsyncedPoints = 0;
+        let currentRewardCallback = null;
+        let adTimerInterval = null;
+
+        let totalSpinsDone = parseInt(localStorage.getItem('totalSpinsDone')) || 0;
+        let lastWheelDate = localStorage.getItem('lastWheelDate');
+
+        if (lastWheelDate !== todayStr) {
+            totalSpinsDone = 0;
+            localStorage.setItem('totalSpinsDone', 0);
+            localStorage.setItem('lastWheelDate', todayStr);
+        }
+
+        let clickCountInSecond = 0;
+        let isClickBlocked = false;
+        setInterval(() => { clickCountInSecond = 0; }, 1000);
+
+        const pE = document.getElementById('points-val');
+        const eb = document.getElementById('eb');
+        const et = document.getElementById('et');
+        const tap = document.getElementById('tap');
+        const area = document.getElementById('area');
+        const keysE = document.getElementById('keys-count');
+        const gemsE = document.getElementById('gems-count');
+        const rechargeVal = document.getElementById('recharge-val');
+        const rechargeFill = document.getElementById('recharge-fill');
+        const userLvlE = document.getElementById('user-lvl');
+
+        function getRequiredPointsForLevel(lvl) {
+            if (lvl <= 20) return lvl * 500; 
+            if (lvl <= 100) return 10000 + ((lvl - 20) * 1500);
+            return 130000 + ((lvl - 100) * 3000);
+        }
+
+        function openTelegramChannel() {
+            const channelUrl = "https://t.me/kdkpoints";
+            if (tg && tg.openTelegramLink) {
+                tg.openTelegramLink(channelUrl);
+            } else {
+                window.open(channelUrl, '_blank');
+            }
+        }
+
+        function shareToSocial(platform) {
+            const botUsername = "KDKpointBot";
+            const shareText = encodeURIComponent("🎁 أجي تلعب معايا فـ KDK Point واجمع نقاط واستبدلها بـ تعبئة 50DH فوري! 🚀");
+            const shareUrl = `https://t.me/${botUsername}?start=${userId || ''}`;
+            
+            let url = "";
+            if (platform === 'whatsapp') {
+                url = `https://api.whatsapp.com/send?text=${shareText}%20${shareUrl}`;
+            } else if (platform === 'telegram') {
+                url = `https://t.me/share/url?url=${shareUrl}&text=${shareText}`;
+            } else if (platform === 'facebook') {
+                url = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+            } else if (platform === 'tiktok') {
+                url = `https://www.tiktok.com/`;
+            }
+
+            if (tg && tg.openTelegramLink && platform === 'telegram') {
+                tg.openTelegramLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        function UI() {
+            pE.innerText = tapPoints.toLocaleString();
+            eb.style.width = (curE / maxE * 100) + '%';
+            et.innerText = `${curE}/${maxE}`;
+            keysE.innerText = keys;
+            gemsE.innerText = gems;
+            rechargeVal.innerText = `${rechargePoints.toLocaleString()} / 10,000`;
+            userLvlE.innerText = `المستوى ${userLevel} 👑`;
+
+            let pct = Math.min(Math.floor((rechargePoints / 10000) * 100), 100);
+            rechargeFill.style.width = pct + '%';
+
+            const c1Btn = document.getElementById('card-1-btn');
+            const c2Btn = document.getElementById('card-2-btn');
+
+            if (card1Views >= 5) {
+                c1Btn.innerText = "مفتوح ✅";
+                c1Btn.style.background = "var(--gn)";
+                c1Btn.style.color = "#000";
+            } else {
+                c1Btn.innerText = `مشاهدة (${card1Views}/5)`;
+            }
+
+            if (card2Views >= 5) {
+                c2Btn.innerText = "مفتوح ✅";
+                c2Btn.style.background = "var(--gn)";
+                c2Btn.style.color = "#000";
+            } else {
+                c2Btn.innerText = `مشاهدة (${card2Views}/5)`;
+            }
+
+            const spinBtn = document.getElementById('spin-btn');
+            const statusText = document.getElementById('wheel-status-text');
+
+            if (totalSpinsDone < 2) {
+                let freeLeft = 2 - totalSpinsDone;
+                if (spinBtn) spinBtn.innerHTML = `🎰 تدوير مجاني (${freeLeft} باقي)`;
+                if (statusText) statusText.innerText = `عندك ${freeLeft} تدويرات مجانية اليوم!`;
+            } else if (totalSpinsDone < 10) {
+                let adLeft = 10 - totalSpinsDone;
+                if (spinBtn) spinBtn.innerHTML = `📺 تدوير بالإعلان (${adLeft} باقي)`;
+                if (statusText) statusText.innerText = `التدويرات المجانية انتهت! باقي ${adLeft} تدويرات بالإعلان.`;
+            } else {
+                if (spinBtn) spinBtn.innerHTML = `🔒 انتهت تدويرات اليوم`;
+                if (statusText) statusText.innerText = `وصلت للحد الأقصى (10 تدويرات). عد غداً!`;
+            }
+            
+            localStorage.setItem('tapPoints', tapPoints);
+            localStorage.setItem('rechargePoints', rechargePoints);
+            localStorage.setItem('userLevel', userLevel);
+            localStorage.setItem('e', curE);
+            localStorage.setItem('keys', keys);
+            localStorage.setItem('gems', gems);
+            localStorage.setItem('totalSpinsDone', totalSpinsDone);
+            localStorage.setItem('card1Views', card1Views);
+            localStorage.setItem('card2Views', card2Views);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`nav-${tabName}`).classList.add('active');
+        }
+
+        function shareWithFriends() {
+            shareToSocial('telegram');
+        }
+
+        function openProtectedAdLink(url, rewardCallback = null) {
+            currentRewardCallback = rewardCallback;
+            document.getElementById('adTimerModal').classList.add('active');
+            document.getElementById('adCloseBtn').style.display = 'none';
+            
+            let timeLeft = 15;
+            const timerText = document.getElementById('adTimerText');
+            timerText.innerText = `⏳ يرجى مشاهدة الإعلان... (${timeLeft}s)`;
+
+            if (adTimerInterval) clearInterval(adTimerInterval);
+
+            adTimerInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    timerText.innerText = `⏳ يرجى مشاهدة الإعلان... (${timeLeft}s)`;
+                } else {
+                    clearInterval(adTimerInterval);
+                    timerText.innerText = `✅ شكراً لك! يمكنك إغلاق الإعلان الآن`;
+                    document.getElementById('adCloseBtn').style.display = 'flex';
+                }
+            }, 1000);
+        }
+
+        function closeAdWithReward() {
+            document.getElementById('adTimerModal').classList.remove('active');
+            if (currentRewardCallback) {
+                currentRewardCallback();
+                currentRewardCallback = null;
+            } else {
+                rechargePoints += 10;
+                unsyncedPoints += 10;
+                UI(); syncWithServer();
+                showPrizeModal("🥳", "شكراً لدعمك!", "تمت إضافة +10 نقاط تعبئة لركيزتك بنجاح!");
+            }
+        }
+
+        function watchCardAd(cardId) {
+            if (cardId === 1 && card1Views >= 5) { showPrizeModal("⚠️", "تنبيه", "أكملت مشاهدة 5 فيديوهات لهذا الكارت!"); return; }
+            if (cardId === 2 && card2Views >= 5) { showPrizeModal("⚠️", "تنبيه", "أكملت مشاهدة 5 فيديوهات لهذا الكارت!"); return; }
+
+            openProtectedAdLink('https://www.effectivecpmnetwork.com/c14nhbifa?key=36ca7b8acf50e1c9bb4d72d7d8012858', () => {
+                if (cardId === 1) {
+                    card1Views++;
+                    showPrizeModal("📺", "تم مشاهدة الإعلان", `مشاهدات الكارت 1: (${card1Views}/5)`);
+                } else if (cardId === 2) {
+                    card2Views++;
+                    showPrizeModal("📺", "تم مشاهدة الإعلان", `مشاهدات الكارت 2: (${card2Views}/5)`);
+                }
+                UI();
+            });
+        }
+
+        function checkLevelUp() {
+            let required = getRequiredPointsForLevel(userLevel);
+            if (tapPoints >= required && userLevel < 1000) {
+                userLevel++;
+                
+                let title = document.getElementById('levelUpTitle');
+                let desc = document.getElementById('levelUpDesc');
+
+                if (userLevel === 50) {
+                    pendingRewardType = 2500;
+                    title.innerText = `🎆 مبروك بلوغ المستوى ${userLevel}!`;
+                    desc.innerText = `حصلت على مكافأة كبرى: 2,500 نقطة تعبئة! شاهد الراعي لاستلامها.`;
+                } else if (userLevel === 100) {
+                    pendingRewardType = 5000;
+                    title.innerText = `🎇 مبروك بلوغ المستوى ${userLevel}!`;
+                    desc.innerText = `حصلت على مكافأة ضخمة: 5,000 نقطة تعبئة! شاهد الراعي لاستلامها.`;
+                } else if (userLevel === 1000) {
+                    pendingRewardType = 10000;
+                    title.innerText = `👑 مبروك الوصول للمستوى الأسطوري 1000!`;
+                    desc.innerText = `ربحت الجائزة الكبرى: تعبئة 100 درهم (100DH)! شاهد الراعي لاستلامها.`;
+                } else {
+                    pendingRewardType = 0;
+                    title.innerText = `🎉 مبروك المستوى ${userLevel}!`;
+                    desc.innerText = `واصل التقدم لفتح مكافآت التعبئة الكبرى!`;
+                }
+
+                document.getElementById('levelUpModal').classList.add('active');
+            }
+        }
+
+        function claimLevelReward() {
+            openProtectedAdLink('https://www.effectivecpmnetwork.com/c14nhbifa?key=36ca7b8acf50e1c9bb4d72d7d8012858', () => {
+                if (pendingRewardType > 0) {
+                    rechargePoints += pendingRewardType;
+                    unsyncedPoints += pendingRewardType;
+                }
+                document.getElementById('levelUpModal').classList.remove('active');
+                UI(); syncWithServer();
+                showPrizeModal("🎉", "تهانينا!", "تمت إضافة المكافأة إلى رصيدك بنجاح 🚀");
+            });
+        }
+
+        tap.onclick = function(e) {
+            if (isClickBlocked) {
+                showPrizeModal("⚠️", "تنبيه الحظر", "تم حظرك مؤقتاً بسبب النقر السريع جداً!");
+                return;
+            }
+
+            clickCountInSecond++;
+            if (clickCountInSecond > 12) {
+                isClickBlocked = true;
+                setTimeout(() => { isClickBlocked = false; }, 5000);
+                showPrizeModal("🚨", "تنبيه", "انتظر 5 ثوانٍ للعودة.");
+                return;
+            }
+
+            if (curE < 1) return;
+            tapPoints += 10;
+            curE -= 1;
+            checkLevelUp();
+            UI();
+
+            let t = document.createElement('div');
+            t.className = 'ft'; t.innerText = '+10';
+            let r = area.getBoundingClientRect();
+            t.style.left = ((e.clientX || r.left + r.width / 2) - r.left - 15) + 'px';
+            t.style.top = ((e.clientY || r.top + r.height / 2) - r.top - 20) + 'px';
+            area.appendChild(t); setTimeout(() => t.remove(), 700);
+            if (tg && tg.HapticFeedback) { tg.HapticFeedback.impactOccurred('light'); }
+        }
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const slots = [
+            { label: "+100 🥳", pts: 100, color: "#ffd700", textColor: "#000", emoji: "🥳" },
+            { label: "+60 🫡", pts: 60, color: "#9d4edf", textColor: "#fff", emoji: "🫡" },
+            { label: "+40 😊", pts: 40, color: "#00e1ff", textColor: "#000", emoji: "😊" },
+            { label: "+20 🙂", pts: 20, color: "#121838", textColor: "#fff", emoji: "🙂" },
+            { label: "0 😅", pts: 0, color: "#ff5722", textColor: "#fff", emoji: "😅" },
+            { label: "🔄 🤞", pts: 0, color: "#00ff88", textColor: "#000", emoji: "🤞" }
+        ];
+
+        let currentAngle = 0;
+
+        function drawVegasWheel() {
+            const numSlots = slots.length;
+            const arcSize = (2 * Math.PI) / numSlots;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2 - 5;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < numSlots; i++) {
+                const angle = i * arcSize;
+                ctx.beginPath();
+                ctx.fillStyle = slots[i].color;
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arcSize);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.4)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = slots[i].textColor;
+                ctx.font = "bold 16px 'Segoe UI', sans-serif";
+                ctx.fillText(slots[i].label, radius - 20, 5);
+                ctx.restore();
+            }
+        }
+        drawVegasWheel();
+
+        function openWheelModal() { document.getElementById('wheelModal').classList.add('active'); }
+        function closeWheelModal() { document.getElementById('wheelModal').classList.remove('active'); }
+        function showPrizeModal(emoji, title, text) {
+            document.getElementById('prizeEmoji').innerText = emoji;
+            document.getElementById('prizeTitle').innerText = title;
+            document.getElementById('prizeText').innerText = text;
+            document.getElementById('prizeModal').classList.add('active');
+        }
+        function closePrizeModal() { document.getElementById('prizeModal').classList.remove('active'); }
+
+        function spinLuckyWheel() {
+            if (isSpinning) return;
+            if (totalSpinsDone >= 10) {
+                showPrizeModal("🔒", "انتهى الحد اليومي", "وصلت للحد الأقصى (10 تدويرات). عد غداً!");
+                return;
+            }
+            if (totalSpinsDone >= 2) {
+                openProtectedAdLink('https://www.effectivecpmnetwork.com/c14nhbifa?key=36ca7b8acf50e1c9bb4d72d7d8012858', () => {
+                    executeWheelSpin();
+                });
+                return;
+            }
+            executeWheelSpin();
+        }
+
+        function executeWheelSpin() {
+            isSpinning = true;
+            totalSpinsDone++;
+            UI();
+
+            const prizeIndex = Math.floor(Math.random() * slots.length);
+            const prize = slots[prizeIndex];
+
+            const numSlots = slots.length;
+            const arcDegree = 360 / numSlots;
+            const slotCenterDegree = prizeIndex * arcDegree + arcDegree / 2;
+            const targetRotation = (360 * 5) + (360 - slotCenterDegree) - 90;
+            currentAngle += (targetRotation % 360) + 1800;
+
+            canvas.style.transform = `rotate(${currentAngle}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                if (prize.pts > 0) {
+                    rechargePoints += prize.pts;
+                    unsyncedPoints += prize.pts;
+                    UI(); syncWithServer();
+                    showPrizeModal(prize.emoji, "مبروك الفوز! 🎉", `ربحت ${prize.pts} نقطة تعبئة فـ عجلة الحظ!`);
+                } else {
+                    showPrizeModal("😅", "حظ أوفر!", "لم تكسب أي نقاط هذه المرة.");
+                }
+            }, 4000);
+        }
+
+        function openCipherModal() {
+            let last = localStorage.getItem('lastCipherDate');
+            if (last === todayStr) { showPrizeModal("🔑", "تنبيه", "أخذت جائزة الشفرة اليومية بالفعل!"); return; }
+            document.getElementById('cipherModal').classList.add('active');
+            document.getElementById('c1').focus();
+        }
+
+        function closeCipherModal() { document.getElementById('cipherModal').classList.remove('active'); }
+
+        function moveFocus(current, nextFieldID) {
+            if (current.value.length >= 1) { document.getElementById(nextFieldID).focus(); }
+        }
+
+        async function verifyCipher() {
+            let c1 = document.getElementById('c1').value;
+            let c2 = document.getElementById('c2').value;
+            let c3 = document.getElementById('c3').value;
+            let c4 = document.getElementById('c4').value;
+            let c5 = document.getElementById('c5').value;
+            let enteredCode = c1 + c2 + c3 + c4 + c5;
+
+            if (enteredCode.length < 5) return;
+
+            try {
+                let res = await fetch(`${REPLIT_URL}/get_cipher`);
+                let data = await res.json();
+                
+                if (data.status === "success" && enteredCode === data.code) {
+                    tapPoints += 5000;
+                    localStorage.setItem('lastCipherDate', todayStr);
+                    closeCipherModal();
+                    checkLevelUp(); UI(); syncWithServer();
+                    showPrizeModal("🎉", "كود صحيح!", "حصلت على +5,000 نقطة عادية بنجاح 🚀");
+                } else {
+                    showPrizeModal("❌", "كود خاطئ", "الكود غير صحيح! تأكد من الشفرة المنشورة في قناة التلغرام t.me/kdkpoints");
+                    document.getElementById('c1').value = '';
+                    document.getElementById('c2').value = '';
+                    document.getElementById('c3').value = '';
+                    document.getElementById('c4').value = '';
+                    document.getElementById('c5').value = '';
+                    document.getElementById('c1').focus();
+                }
+            } catch(err) {
+                showPrizeModal("⚠️", "خطأ اتصال", "تعذر الاتصال بالسيرفر، حاول مجدداً!");
+            }
+        }
+
+        function checkComboRequirement() {
+            let last = localStorage.getItem('lastComboDate');
+            if (last === todayStr) { showPrizeModal("⭐", "تنبيه", "أخذت جائزة الكومبو اليومي بالفعل!"); return; }
+
+            if (card1Views < 5 || card2Views < 5) {
+                showPrizeModal("🔒", "كومبو مقفل!", "لفتح الكومبو اليومي، يجب عليك مشاهدة 5 فيديوهات إعلانية لكل كارت في قسم التعدين ⛏️!");
+                return;
+            }
+
+            tapPoints += 15000;
+            localStorage.setItem('lastComboDate', todayStr);
+            checkLevelUp(); UI(); syncWithServer();
+            showPrizeModal("🎉", "كومبو صحيح!", "مبروك! جمعت الكومبو اليومي وحصلت على +15,000 نقطة عادية 🚀");
+        }
+
+        async function syncWithServer() {
+            if (!TOKEN || unsyncedPoints === 0) return;
+            let amountToSend = unsyncedPoints;
+            unsyncedPoints = 0;
+            try {
+                let res = await fetch(`${REPLIT_URL}/sync_points?token=${TOKEN}&amount=${amountToSend}&initData=${encodeURIComponent(initData)}`);
+                let data = await res.json();
+                if (data.status === "success") { console.log("Synced:", data.new_points); }
+            } catch(err) { unsyncedPoints += amountToSend; }
+        }
+        setInterval(syncWithServer, 4000);
+        setInterval(() => { if(curE < maxE) { curE++; UI(); } }, 3000);
+
+        function daily() {
+            let lastClaim = localStorage.getItem('d');
+            if (lastClaim === todayStr) { showPrizeModal("🎁", "تنبيه", "أخذت الهدية اليومية بالفعل اليوم!"); return; }
+            rechargePoints += 50; keys += 1; unsyncedPoints += 50;
+            localStorage.setItem('d', todayStr);
+            UI(); syncWithServer();
+            showPrizeModal("🎉", "مبروك الهدية!", "حصلت على +50 نقطة تعبئة و 🔑 مفتاح ملكي!");
+        }
+
+        function boostEnergy() { curE = maxE; UI(); showPrizeModal("⚡", "شحن الطاقة", "تم شحن الطاقة بالكامل!"); }
+        
+        UI();
+    </script>
+</body>
+</html>
